@@ -1,44 +1,68 @@
-# GCP へのサービス別配置案（設計資料、IaC未実装）
+# GCP — Terraform設計サンプル（合成データ専用）
 
-## マッピング
+**Cloud Run（frontend/backend/inference）を別サービスで定義し、推論サービスだけIAMで限定公開**するTerraformのサンプルです。未デプロイ・未検証です。エンドユーザー認証のないサンプルなので**実患者データは投入禁止**。
 
-| Local component | GCP option | Purpose |
-|---|---|---|
-| `frontend` Vite `dist/` | Cloud Storage + Cloud CDN (via load balancer) / Firebase Hosting | 静的Web配信 |
-| `backend` container | Cloud Run | Public API（認証プロキシ/入口設計が別途必要） |
-| `inference` container | private Cloud Run service | `/v1/extract` 内部API、独立デプロイ |
-| Ollama/other runner | Cloud Run GPU / GCE GPU | モデルランタイム。場合により推論APIと同じCloud Run deploy unitにする |
-| `model-init` | Local-only | Cloud側は事前取得済み重み/モデルイメージ/モデルストレージを準備 |
-| Persistent storage (future) | Cloud Storage / Cloud SQL | 目的を明確にしたうえで設置 |
-| Async jobs (future) | Cloud Tasks + worker | 非同期業務が必要になった場合 |
+**必読:** [DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md)
 
-## Backend から private Cloud Run Inference を呼ぶ
+## サービス構成と責務
 
-- 推論サービスは未認証公開にしない。
-- Backend実行用Service Accountに推論サービスの `roles/run.invoker` を付与。
-- Backendに `INFERENCE_URL=https://YOUR-INFERENCE-SERVICE.run.app` を設定。
-- `INFERENCE_AUTH_MODE=google_id_token`, `INFERENCE_AUDIENCE=https://YOUR-INFERENCE-SERVICE.run.app` を設定。
-- BackendはID tokenを取得し、`Authorization: Bearer` で送る実装を内蔵。**IAM権限とGoogle実行環境の設定は利用者側で必要**。
-- Local Composeでは `INFERENCE_AUTH_MODE=none` を使う。
+```text
+Browser
+  ├─ HTTPS → Cloud Run frontend :80 (Nginx/React built dist)
+  └─ HTTPS → Cloud Run backend :8000 (public demo API, CORS configured)
+                     │ ID token (backend service account)
+                     ▼
+           Cloud Run inference :8100 (IAM invoker = backend only)
+             ├─ inference FastAPI :8100  (ingress container)
+             └─ Ollama :11434          (preloaded-model sidecar; localhost)
+```
 
-## GPU推論へ切り替える場合
+- Frontend React/TSXとBackend FastAPIは**別デプロイ**。静的ファイルを含むNginxイメージを使用。
+- Backendの `INFERENCE_URL`/`INFERENCE_AUDIENCE` には推論Cloud Run URLを設定。コード側に`google_id_token`モードが実装済み。
+- Inferenceは他のCloud Runと独立デプロイ、OllamaはInferenceと**同じデプロイ単位**のサイドカー。Local Composeの`model-init`はクラウドでは使わない。
+- Inferenceへの匿名リクエストを拒否するのはCloud Run IAM。`ingress=ALL`なので**ネットワーク的に内部限定ではない**。用途に応じてingress/VPC設計を追加。
 
-Cloud Run GPUはLLM推論に対応。ただしGPU種別・リージョン・CPU/メモリ最小要件・クォータに制約がある。GPUサービス内でモデルを直接実行するには、`inference` service内部のruntimeを交換するか、Ollama sidecarで推論ランタイムを同一デプロイ単位にまとめる。**付属のComposeをそのまま単一Cloud Runサービスに投げても、望む独立デプロイ・重みの永続化は成立しない**。
+## 配置ファイル
 
-Cloud Runコンテナは ingress port と一致するポートを `0.0.0.0` でListenする必要がある。各Dockerfileはそれぞれ8000/8100でListenするので、デプロイ側でもそのポートを指定する。
+- `versions.tf`、`variables.tf`、`terraform.tfvars.example`: 変数と事前にpushされたイメージの参照
+- `main.tf`: API有効化、Artifact Registry、サービスアカウント、Cloud Run、IAM
+- `outputs.tf`: 各サービスURL
+- `DEPLOY_CHECKLIST.md`: 実デプロイ前の確認項目
+- `../shared/ollama/Dockerfile`: モデル入りOllamaイメージのビルド例
 
-## フロントエンド
+## Planの確認（リソース作成なし）
 
-CDN配信する場合 `VITE_API_BASE_URL=https://api.example.com/api` をビルド時に注入し、Backendの `CORS_ORIGINS` を一致させる。アクセストークンをJavaScriptに恒久保存せず、認証方式とcookie方針を別途設計する。
+```bash
+cd deploy/gcp
+cp terraform.tfvars.example terraform.tfvars
+# project_id、image、frontend_originを実値に更新
+gcloud auth application-default login
+terraform fmt -recursive
+terraform init -backend=false
+terraform validate
+terraform plan -var-file=terraform.tfvars
+```
 
-## 本番化前のチェック
+**注意:** `terraform plan`は資格情報・プロジェクト状態にアクセスします。providerが未インストールなら`init`はダウンロードします。`terraform apply`は料金が発生するため、レビューと予算上限の設定が先です。
 
-1. 認証/OIDC、Cloud Armor/WAF、TLS、private ingress、Secret Manager、監査ロギングを決める。
-2. `use_llm=true` の同期APIが許容されるレイテンシかを計測する。長時間ならCloud Tasksを検討。
-3. `INFERENCE_AUTH_MODE` はGoogle ID tokenのみ実装済み。ネットワーク経路/IAMの正しさは実クラウド環境で統合確認。
-4. モデル・プロンプト・データバージョン固定、病院とのデータ処理契約/国内法・ガイドライン確認。
+## 実デプロイに進むなら（レビュー後の参考手順）
 
-参考:
-- https://docs.cloud.google.com/run/docs/authenticating/service-to-service
-- https://docs.cloud.google.com/run/docs/configuring/services/gpu
-- https://docs.cloud.google.com/run/docs/container-contract
+1. 対象プロジェクトに請求・必要API・権限を用意。Artifact Registry作成後に4イメージをpush。初回のbootstrapに限り `terraform apply -target=google_project_service.required -target=google_artifact_registry_repository.images -var-file=terraform.tfvars` として段階的に作成する方法があります（通常運用で`-target`は推奨しない）。
+2. Backend/Inferenceは `docker build ./backend`, `docker build ./inference`。モデル入りイメージは `deploy/shared/ollama` を参照（`ollama/ollama` 素のイメージではモデルがない）。タグよりimage digest固定を推奨。
+3. Frontendは`docker build --target production --build-arg VITE_API_BASE_URL=https://<backend>.run.app/api ... ./frontend`で**ビルド時にAPI URLが固定**される。最初はBackend URLが未確定のため、Backend作成→URL確定→Frontend再ビルド・再デプロイ、という2段階の手順が必要。`frontend_origin`には最終的なFrontendの完全なHTTPS originを設定し直す。
+4. `terraform plan -out=plan.out` の差分をレビューしてから適用。デプロイ後はIAM、CORS、モデル準備、APIの動作を [DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md) に従って確認。
+
+## サンプルの未整備事項と注意
+
+- FrontendとBackendは`allUsers`で呼び出せる**公開デモ**。エンドユーザー向け認証（IAP/OIDC等）はまだ無い。
+- Cloud Runの3サービスそれぞれにservice accountを使用。推論APIのInvokerはBackendだけ。GCPの組織ポリシーによっては`allUsers`設定を適用できません。
+- Sidecarが起動してもモデルが格納されているとは限らないので、`/health/ready` を別途確認。
+- サンプルはCPUのみ。Cloud Run GPU・VPC/ネットワーク隔離・秘密情報管理・永続ストレージ・請求予算・CI/CD・WAF・監視アラートは未実装。
+- 画像レジストリが別プロジェクトの場合はCloud RunサービスエージェントのArtifact Registry読み取り権限が別途必要。
+- Chrome等のブラウザからは`CORS_ORIGINS`が実際のfrontend URLと一致しないとAPIを使えません。CORSは認証ではありません。
+
+## 公式参照
+
+- [Cloud Run サービス間認証](https://docs.cloud.google.com/run/docs/authenticating/service-to-service)
+- [Cloud Run マルチコンテナ](https://docs.cloud.google.com/run/docs/configuring/services/containers)
+- [Cloud Run IAM](https://docs.cloud.google.com/run/docs/securing/managing-access)
