@@ -1,0 +1,362 @@
+[
+  {
+    "id": "01_direct_full",
+    "category": "direct",
+    "narrative": "10:30 歩行時ふらつきあり。移乗時は看護師が介助。転倒は認めず。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "id": "02_paraphrase_requested",
+    "category": "paraphrase",
+    "narrative": "10:30 歩行中に身体が左右に揺れ、看護師が腕を支えて移動した。床に倒れることはなかった。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "id": "03_unmentioned",
+    "category": "unknown",
+    "narrative": "血圧を測定し、食事量を記録した。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "04_fall_event",
+    "category": "direct",
+    "narrative": "廊下で転倒した。看護師が到着して状態を確認した。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "present",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "05_no_fall_only",
+    "category": "negative",
+    "narrative": "転倒なし。特に追加の観察記録はない。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "06_stable_no_help",
+    "category": "negative",
+    "narrative": "歩行は安定しており、ふらつきなし。介助不要と記録。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "absent",
+      "assistance_status": "absent"
+    }
+  },
+  {
+    "id": "07_gait_only",
+    "category": "paraphrase",
+    "narrative": "歩く際によろめいていた。血圧は安定。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "present",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "08_assistance_only",
+    "category": "paraphrase",
+    "narrative": "看護師が患者の背中を支えながら移動した。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "id": "09_vertigo_not_gait",
+    "category": "unknown",
+    "narrative": "本人がめまいを訴えた。歩行状態については記載なし。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "10_all_three_direct",
+    "category": "direct",
+    "narrative": "転倒した。ふらつきなし。介助不要。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "present",
+      "dizziness_status": "absent",
+      "assistance_status": "absent"
+    }
+  },
+  {
+    "id": "11_no_fall_unstable",
+    "category": "paraphrase",
+    "narrative": "足がもつれてバランスを崩したが、倒れずに立て直した。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "12_nurse_stands_by",
+    "category": "unknown",
+    "narrative": "看護師が廊下にいた。患者は会話していた。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "13_fall_absent_no_assistance",
+    "category": "negative",
+    "narrative": "床に倒れることはなく、介助は不要だった。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "unknown",
+      "assistance_status": "absent"
+    }
+  },
+  {
+    "id": "14_unsteady_with_help",
+    "category": "paraphrase",
+    "narrative": "左右に身体がぶれ、スタッフに脇を支えられて歩いた。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "present",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "id": "15_independent_gait",
+    "category": "negative",
+    "narrative": "歩行時のふらつきは認めなかった。介助は行っていない。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "absent",
+      "assistance_status": "absent"
+    }
+  },
+  {
+    "id": "16_actual_fall",
+    "category": "paraphrase",
+    "narrative": "立ち上がろうとした際、足を滑らせて床に倒れた。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "present",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "17_help_not_mentioned",
+    "category": "unknown",
+    "narrative": "転倒はなかった。検温を行った。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "18_assisted_transfer",
+    "category": "direct",
+    "narrative": "トイレへ移る際に職員が移乗を介助した。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "id": "19_negative_unsteady",
+    "category": "negative",
+    "narrative": "病室内での歩行は安定。ふらつきはない。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "absent",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "20_full_paraphrase",
+    "category": "paraphrase",
+    "narrative": "歩行中に大きくよろめいたため職員が腕を保持したが、転ぶことはなかった。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "id": "21_fall_only_positive",
+    "category": "direct",
+    "narrative": "転倒を確認した。その他の動作については未記録。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "present",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "22_assist_none",
+    "category": "negative",
+    "narrative": "介助不要。自力でベッド上に座った。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "absent"
+    }
+  },
+  {
+    "id": "23_nurse_observation_only",
+    "category": "unknown",
+    "narrative": "看護師が転倒リスクの説明を行った。実際の転倒の有無は未記録。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "id": "24_direct_gait",
+    "category": "direct",
+    "narrative": "歩行時ふらつきを認めた。転倒なし。",
+    "record": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    },
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "unknown"
+    }
+  }
+]

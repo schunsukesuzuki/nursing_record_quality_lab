@@ -1,0 +1,83 @@
+name: nursing-record-quality-lab
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+    networks: [internal]
+
+  model-init:
+    image: ollama/ollama:latest
+    # Explicit script avoids Compose string-command/argument parsing ambiguity.
+    # The CLI connects to the long-running Ollama service (no model volume here).
+    entrypoint: ["/bin/sh", "/opt/model-init.sh"]
+    volumes:
+      - ./scripts/model-init.sh:/opt/model-init.sh:ro
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      MODEL_NAME: ${MODEL_NAME:-qwen3:0.6b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    networks: [internal]
+
+  inference:
+    build: ./inference
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-180}
+      MODEL_NAME: ${MODEL_NAME:-qwen3:0.6b}
+    # Independent process lifecycle: model loading or pulling must not block this service.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health/live', timeout=8)"]
+      interval: 5s
+      timeout: 10s
+      retries: 24
+      start_period: 15s
+    restart: unless-stopped
+    networks: [internal]
+
+  backend:
+    build: ./backend
+    environment:
+      INFERENCE_URL: http://inference:8100
+      INFERENCE_TIMEOUT_SECONDS: ${INFERENCE_TIMEOUT_SECONDS:-195}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      INFERENCE_AUTH_MODE: none
+    # Rule-based audits must be available even if Ollama or inference is down.
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+    networks: [internal]
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      VITE_PROXY_TARGET: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5173:5173"
+    restart: unless-stopped
+    networks: [internal]
+
+networks:
+  internal: {}
+volumes:
+  ollama_models: {}
