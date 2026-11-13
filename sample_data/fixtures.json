@@ -1,0 +1,34 @@
+[
+  {
+    "narrative": "歩行時ふらつきあり。移乗時は看護師が介助。転倒は認めず。",
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "present"
+    }
+  },
+  {
+    "narrative": "転倒した。ふらつきなし。介助不要。",
+    "expected": {
+      "fall_status": "present",
+      "dizziness_status": "absent",
+      "assistance_status": "absent"
+    }
+  },
+  {
+    "narrative": "血圧測定。食事摂取は良好。",
+    "expected": {
+      "fall_status": "unknown",
+      "dizziness_status": "unknown",
+      "assistance_status": "unknown"
+    }
+  },
+  {
+    "narrative": "歩行時ふらつきあり。転倒なし。",
+    "expected": {
+      "fall_status": "absent",
+      "dizziness_status": "present",
+      "assistance_status": "unknown"
+    }
+  }
+]
