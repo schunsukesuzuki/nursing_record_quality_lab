@@ -65,3 +65,11 @@ sequenceDiagram
 ## v1.2: 起動依存とサービス可用性
 
 Docker healthcheck は inference プロセスの liveness (`/health/live`) のみを見る。Ollamaやモデルの readiness (`/health/ready`) は診断に使用するが、backendの起動をブロックしない。LLMモードが失敗しても `use_llm=false` の決定論的監査機能は使用可能とする。クラウドの readiness / traffic routing は別途SLOとモデル配置方式に基づいて設計する。
+
+
+## IaC scaffold（AWS/GCPの設計例）
+
+- AWS: `deploy/aws/` = CloudFront+S3 / ECS Fargate backend / ECS Fargate inference+Ollama sidecar / Cloud Map / public ALB demo.
+- GCP: `deploy/gcp/` = Cloud Run frontend/backend/inference。Inferenceのマルチコンテナ内にモデル事前格納済みOllamaをsidecar配置。Backend→InferenceはGoogle ID token + IAM。
+- いずれも**実デプロイ未検証・実患者情報に使用不可**。推論のサイドカー配置は「Inference APIとモデル実行をタスク単位で同居させる」実装上の一案であり、モデルランタイムを独立スケールする必要が生じれば別サービスに変更する。
+- 詳細は各クラウドのREADME/DEPLOY_CHECKLIST.mdと `deploy/shared/ollama/README.md` を参照。

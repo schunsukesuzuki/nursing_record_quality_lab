@@ -1,0 +1,7 @@
+aws_region      = "ap-northeast-1"
+prefix          = "nrl-demo"
+backend_image   = "111111111111.dkr.ecr.ap-northeast-1.amazonaws.com/nrl-demo-backend:CHANGE_ME"
+inference_image = "111111111111.dkr.ecr.ap-northeast-1.amazonaws.com/nrl-demo-inference:CHANGE_ME"
+ollama_image    = "111111111111.dkr.ecr.ap-northeast-1.amazonaws.com/nrl-demo-ollama-model:CHANGE_ME"
+model_name      = "qwen3:0.6b"
+desired_count   = 1

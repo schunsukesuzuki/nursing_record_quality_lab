@@ -1,4 +1,4 @@
-# Nursing Record Quality Lab — v1.5 (意味定義・独立評価・比較実験) — Local LLM × FastAPI × React/TSX
+# Nursing Record Quality Lab — v1.6（AWS/GCP IaC scaffold追加） — Local LLM × FastAPI × React/TSX
 
 **面接・技術検証用の最小アプリ**。実在する患者・診療データを投入しないでください。臨床判断・記録修正に使用できません。
 
@@ -8,6 +8,21 @@
 2. **対象事業への理解を示す**: 構造化記録の「未記録」「明示的否定」「不一致」を分け、自由記述との整合性を検証する。実サービスで同じ課題・未実装機能があると断定しない。
 3. **研究・数理的な強みを示す**: ルールベース対LLM、誤検出・見逃し・証拠照合・レイテンシを測る。欠測メカニズムや施設間バイアスに発展できる。
 4. **クラウド設計能力を示す**: コードと推論基盤を疎結合にし、AWS/GCPで別々に配置・更新できる設計とする。
+
+
+## AWS/GCPのモックIaCとデプロイ前チェック（今回追加）
+
+**v1.6はIaC・ドキュメントのみの追加で、v1.5アプリの動作コードは変更せず**、`deploy/` 配下にTerraformサンプルとクラウド別チェックリストを追加しました。
+**Terraformの実適用・AWS/GCP上の動作確認は未実施**です。実患者データを投入しないでください。
+
+| クラウド | Terraform | デプロイ前チェック | 主な構成 |
+|---|---|---|---|
+| AWS | [`deploy/aws/`](deploy/aws/) | [`deploy/aws/DEPLOY_CHECKLIST.md`](deploy/aws/DEPLOY_CHECKLIST.md) | S3+CloudFront、Fargate backend/inference、Cloud Map、Ollamaサイドカー |
+| GCP | [`deploy/gcp/`](deploy/gcp/) | [`deploy/gcp/DEPLOY_CHECKLIST.md`](deploy/gcp/DEPLOY_CHECKLIST.md) | Cloud Run frontend/backend/inference、IAM ID token、Ollamaサイドカー |
+
+推論用モデルはローカルでは `model-init` で自動取得しますが、クラウドのスケール時にはモデルpullせず、[`deploy/shared/ollama/`](deploy/shared/ollama/) で**モデルを事前配置したイメージ**を使用する設計例です。
+
+`terraform plan` / `terraform validate` の例は各クラウドのREADMEに記載。IaCの検証範囲は [`docs/iac_validation.md`](docs/iac_validation.md) に明記。`terraform apply` は実費を発生させる可能性があり、コードも本番セキュリティ未対応です。
 
 ## v1.5: 実際の失敗例から改善した内容
 
